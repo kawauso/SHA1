@@ -10,10 +10,10 @@
 @_exported import CryptoEssentials
 
 public final class SHA1 : HashProtocol {
-    public static let size:Int = 20 // 160 / 8
+    public static let size: Int = 20 // 160 / 8
     public let message: [Byte]
     
-    init(_ message: [Byte]) {
+    public init(_ message: [Byte]) {
         self.message = message
     }
     
