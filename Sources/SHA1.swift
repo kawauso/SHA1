@@ -1,32 +1,46 @@
+// Originally based on CryptoSwift by Marcin Krzyżanowski <marcin.krzyzanowski@gmail.com>
+// Copyright (C) 2014 Marcin Krzyżanowski <marcin.krzyzanowski@gmail.com>
+// This software is provided 'as-is', without any express or implied warranty.
 //
-//  SHA1.swift
-//  CryptoSwift
+// In no event will the authors be held liable for any damages arising from the use of this software.
 //
-//  Created by Marcin Krzyzanowski on 16/08/14.
-//  Copyright (c) 2014 Marcin Krzyzanowski. All rights reserved.
+// Permission is granted to anyone to use this software for any purpose,including commercial applications, and to alter it and redistribute it freely, subject to the following restrictions:
 //
+// - The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation is required.
+// - Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+// - This notice may not be removed or altered from any source or binary distribution.
 
 @_exported import C7
 @_exported import CryptoEssentials
 
 public final class SHA1 : HashProtocol {
+    private static let h:[UInt32] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0]
     public static let size: Int = 20 // 160 / 8
-    public let message: [Byte]
     
-    public init(_ message: [Byte]) {
-        self.message = message
-    }
-    
-    private let h:[UInt32] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0]
-    
-    public func calculate() -> [Byte] {
-        var tmpMessage = self.prepare(64)
+    public static func calculate(message: [Byte]) -> [Byte] {
+        var tmpMessage = message
+        
+        let len = 64
+        
+        // Step 1. Append Padding Bits
+        tmpMessage.append(0x80) // append one bit (UInt8 with one bit) to message
+        
+        // append "0" bit until message length in bits ≡ 448 (mod 512)
+        var msgLength = tmpMessage.count
+        var counter = 0
+        
+        while msgLength % len != (len - 8) {
+            counter += 1
+            msgLength += 1
+        }
+        
+        tmpMessage += Array<UInt8>(repeating: 0, count: counter)
         
         // hash values
         var hh = h
         
         // append message length, in a 64-bit big-endian integer. So now the message length is a multiple of 512 bits.
-        tmpMessage += (self.message.count * 8).bytes(64 / 8)
+        tmpMessage += arrayOfBytes(message.count * 8, length: 64 / 8)
         
         // Process the message in successive 512-bit chunks:
         let chunkSizeBytes = 512 / 8 // 64
