@@ -15,7 +15,7 @@
 
 public final class SHA1 : HashProtocol {
     private static let h:[UInt32] = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0]
-    public static let size: Int = 20 // 160 / 8
+    public static let size: Int = 64
     
     public static func calculate(message: [Byte]) -> [Byte] {
         var tmpMessage = message
